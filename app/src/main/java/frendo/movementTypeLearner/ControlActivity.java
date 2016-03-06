@@ -1,13 +1,26 @@
 package frendo.movementTypeLearner;
 
+import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.CompoundButton;
+import android.widget.Switch;
+import android.widget.TextView;
+
+import java.util.Date;
+
+import frendo.movementTypeLearner.util.Constants;
 
 public class ControlActivity extends AppCompatActivity {
 
@@ -18,20 +31,57 @@ public class ControlActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        onCreateUI();
+        startLocationBroadcastListener();
+    }
+
+    private void onCreateUI() {
+        Switch sw = (Switch) findViewById(R.id.switchTrack);
+        final TextView tvTrackingStatus = (TextView) findViewById(R.id.textViewTrackingStatus);
+
+        if (isServiceRunning(MovementTypeLearnerService.class)) {
+            sw.setChecked(true);
+            tvTrackingStatus.setText("Tracking status: TRACKING");
+        }
+        else {
+            tvTrackingStatus.setText("Tracking status: NOT TRACKING");
+        }
+
+        final Intent serviceIntent = new Intent(this, MovementTypeLearnerService.class);
+
+        sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked == true) {
+                    startService(serviceIntent);
+                    tvTrackingStatus.setText("Tracking status: TRACKING");
+                }
+                if (isChecked == false) {
+                    stopService(serviceIntent);
+                    tvTrackingStatus.setText("Tracking status: NOT TRACKING");
+                }
             }
         });
+    }
+
+    private void startLocationBroadcastListener() {
+        final TextView trackingHistory = (TextView) findViewById(R.id.textViewTrackingHistory);
+
+        BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+            public void onReceive(Context context, Intent intent) {
+                double[] data = intent.getDoubleArrayExtra(Constants.BROADCAST_LOCATION_DATA);
+                trackingHistory.setText(new Date((long) data[0]) + ": " + data[1] + "/" + data[2] +  " " + data[3] + "m/s");
+            }
+        };
+
+        IntentFilter locationIntentFilter = new IntentFilter(Constants.BROADCAST_LOCATION_ACTION);
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, locationIntentFilter);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_control, menu);
+            getMenuInflater().inflate(R.menu.menu_control, menu);
         return true;
     }
 
@@ -49,4 +99,15 @@ public class ControlActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
