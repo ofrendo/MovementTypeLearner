@@ -52,6 +52,20 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:id="@+id/textViewTrackingHistory" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Export DB"
+            android:id="@+id/buttonExportDB" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="[DBSize]"
+            android:id="@+id/textViewDBSize" />
+
     </LinearLayout>
 
 </RelativeLayout>

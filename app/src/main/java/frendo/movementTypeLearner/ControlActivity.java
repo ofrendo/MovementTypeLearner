@@ -11,18 +11,23 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.Date;
 
+import frendo.movementTypeLearner.db.DBHelper;
 import frendo.movementTypeLearner.util.Constants;
 
 public class ControlActivity extends AppCompatActivity {
+
+    private DBHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,8 +36,12 @@ public class ControlActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        dbHelper = new DBHelper(this);
+
         onCreateUI();
         startLocationBroadcastListener();
+
+        Log.d("CURRENT TS", "" + System.currentTimeMillis());
     }
 
     private void onCreateUI() {
@@ -48,7 +57,6 @@ public class ControlActivity extends AppCompatActivity {
         }
 
         final Intent serviceIntent = new Intent(this, MovementTypeLearnerService.class);
-
         sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -62,6 +70,19 @@ public class ControlActivity extends AppCompatActivity {
                 }
             }
         });
+
+        // Set button listener for exporting the DB
+        final Button buttonExportDB = (Button) findViewById(R.id.buttonExportDB);
+        buttonExportDB.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                dbHelper.exportDB();
+            }
+        });
+
+        // Set DB Size
+        TextView tvDBSize = (TextView) findViewById(R.id.textViewDBSize);
+        String dbSizeString = "DB Size on app open: " + String.format("%.2f", (double) dbHelper.getDBSize() / 1024 / 1024) + "MB";
+        tvDBSize.setText(dbSizeString);
     }
 
     private void startLocationBroadcastListener() {

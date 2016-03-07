@@ -33,7 +33,7 @@ public class MovementTypeLearnerService extends Service {
         locationHandler = new LocationHandler(this, new LocationCallback() {
             public void doCallback(Location location) {
                 dbHelper.insertLocations(
-                        System.currentTimeMillis(),
+                        //System.currentTimeMillis(),
                         location.getLatitude(),
                         location.getLongitude(),
                         (location.getProvider().equals("gps") ? DBLocations.VALUE_PROVIDER_GPS : DBLocations.VALUE_PROVIDER_NETWORK)
@@ -68,6 +68,7 @@ public class MovementTypeLearnerService extends Service {
     public void onDestroy() {
         Log.d("MovementTypeService", "onDestroy");
         locationHandler.destroy();
+        dbHelper.close();
     }
 
     @Override
