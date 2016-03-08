@@ -38,7 +38,7 @@ public class LocationHandler implements LocationListener {
                 || ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
             Log.d("LocationHandler", "Init locationHandler...");
-            onLocationChanged(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+            //onLocationChanged(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
 
             /*Criteria criteria = new Criteria();
             criteria.setAccuracy(Criteria.ACCURACY_FINE);
